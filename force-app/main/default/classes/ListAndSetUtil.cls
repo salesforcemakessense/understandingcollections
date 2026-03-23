@@ -87,5 +87,39 @@ public with sharing class ListAndSetUtil {
         System.debug(sicCodes);
     }
 
+    public static void useCaseTen(){
+        Set<Date> closeDates = new Set<Date>();
+        List<Date> closeDateList = new List<Date>();
+        for(Opportunity opp: [SELECT Id, Closedate FROM Opportunity WHERE CloseDate != null]){
+            closeDateList.add(opp.CloseDate);
+        }      
+        closeDates.addAll(closeDateList);
+        System.debug(closeDates.size());
+    }
+
+    public static void useCaseEleven(){
+        Set<String> oppNames = new Set<String>();
+        for(Opportunity opp: [SELECT Id, Name FROM Opportunity]){
+            if(opp.Name != null){ 
+                oppNames.add(opp.Name);
+            }
+        }
+
+        System.debug(oppNames);
+        System.debug(oppNames.size());
+    }
+
+    public static void useCaseTwelve(){
+        List<String> billingStateList = new List<String>();
+        Set<String> billingSet = new Set<String>();
+        for(Account acc: [SELECT Id, Name, BillingState FROM Account WHERE BillingState != null ORDER By BillingState]){
+            billingSet.add(acc.BillingState);
+        }
+        
+        billingStateList = new List<String>(billingSet);
+        System.debug(billingStateList.size());
+        System.debug(billingStateList);
+    }
+
 
 }
