@@ -55,5 +55,37 @@ public with sharing class ListAndSetUtil {
         System.debug(phoneNumbers.size());
     }
 
+    public static void useCaseSeven(){
+        Set<String> uniqueTitles = new Set<String>();
+        for(Contact con: [SELECT Id,Title FROM Contact WHERE Title != null]){
+            uniqueTitles.add(con.Title);
+        }
+        System.debug(uniqueTitles.size());
+        System.debug(uniqueTitles);
+    }
+
+    public static void useCaseEight(){
+        Set<Id> contactIds = new Set<Id>();
+        Set<String> emailList = new Set<String>();
+        List<AggregateResult> results = [SELECT COUNT(Id), Email FROM Contact WHERE Email != null GROUP BY Email HAVING COUNT(Id) > 1];
+        for(AggregateResult result: results){
+            emailList.add((String)result.get('Email'));
+        }
+        for(Contact con: [SELECT Id FROM Contact WHERE Email IN :emailList]){
+            contactIds.add(con.Id);
+        }
+        System.debug(contactIds.size());
+        System.debug(contactIds);
+    }
+
+    public static void useCaseNine(){
+        List<String> sicCodes = new List<String>();
+        for(Lead eachLead: [SELECT Id, SICCode__c FROM Lead WHERE SICCode__c != null]){
+            sicCodes.add(eachLead.SICCode__c);
+        }
+        System.debug(sicCodes.size());
+        System.debug(sicCodes);
+    }
+
 
 }
