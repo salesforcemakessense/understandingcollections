@@ -121,5 +121,39 @@ public with sharing class ListAndSetUtil {
         System.debug(billingStateList);
     }
 
+    public static List<Opportunity> useCaseThirteen(){
+        List<Opportunity> oppRecords = [SELECT Id, Name, StageName, CLoseDate FROM Opportunity WHERE CloseDate = THIS_YEAR ORDER BY CloseDate DESC];
+        return oppRecords;
+    }
+
+    public static Boolean useCaseFourteen(Id accountId){
+        Boolean multipleTitlesFound = false; 
+        List<String> titleList = new List<String>();
+        List<String> multipleTitleList = new List<String>();
+
+        List<Contact> conRecords = [SELECT Id, Title FROM Contact WHERE AccountId =:accountId];
+        for(Contact con: conRecords){
+            if(titleList.contains(con.Title)){
+                multipleTitleList.add(con.Title); 
+            }
+            titleList.add(con.Title);
+        }
+
+        if(multipleTitleList.size() > 0){
+            multipleTitlesFound = true; 
+        }
+
+        return multipleTitlesFound;
+    }
+    public static List<String> useCaseFifteen(){
+        Set<String> leadSourceSet = new Set<String>();
+        List<Lead> leadRecords = [SELECT Id, Name, LeadSource FROM Lead WHERE LeadSource != null];
+        for(Lead leadRecord: leadRecords){
+            leadSourceSet.add(leadRecord.LeadSource);
+        }
+        List<String> sourcesList = new List<String>(leadSourceSet);
+        return sourcesList;
+    }
+
 
 }
