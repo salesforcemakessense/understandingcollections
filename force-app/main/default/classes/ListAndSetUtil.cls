@@ -155,5 +155,35 @@ public with sharing class ListAndSetUtil {
         return sourcesList;
     }
 
+    public static List<String> useCaseSixteen(Set<String> accountNames){
+        List<String> accountNameList = new List<String>(accountNames);
+        List<String> finalNameList = new List<String>();
+        accountNameList.sort();
+        for(Integer i = accountNameList.size() - 1; i >= 0 ; i--){
+            finalNameList.add(accountNameList[i]);
+        }
+        return finalNameList;
+    }
+
+    public static List<String> useCaseSeventeen(){
+        Set<String> productNameSet = new Set<String>();
+        for(Product2 product: [SELECT Id, Name, Createddate FROM Product2 WHERE Name != null]){
+            productNameSet.add(product.Name);
+        }
+        List<String> productList = new List<String>(productNameSet);
+
+        return productList;
+    }
+
+    public static List<Id> useCaseEighteen(Set<String> acceptedStates){
+        List<Id> conList = new List<Id>();
+        List<Contact> conRecords = [SELECT Id, MailingState FROM Contact WHERE MailingState != null];
+        for(Contact con: conRecords){
+            if(acceptedStates.contains(con.MailingState)){
+                conList.add(con.Id);
+            }
+        }
+        return conList;
+    }
 
 }
