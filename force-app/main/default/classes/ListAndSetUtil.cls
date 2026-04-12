@@ -186,4 +186,60 @@ public with sharing class ListAndSetUtil {
         return conList;
     }
 
+    public static void useCaseNineteen(List<Lead> leadRecords){
+        //I have my lead records,I want to create contacts for only those leads where email id does not exist in the system
+        //I will extract all email ids from my lead list.
+        //I will query and check which email ids are in contacts database already
+        //I wil isolate the lead records which dont have a corresponding contact with same email
+        //Only those leads, I will use to create contacts in the system 
+
+        List<Contact> conRecordsToCreate = new List<Contact>();
+        List<Lead> createLeadToContactList = new List<Lead>();
+
+        List<String> leadEmails = new List<String>();
+        List<String> leadEmailsToCreate = new List<String>();
+        List<String> conMatchingEmailList = new List<String>();
+
+        for(Lead lead: leadRecords){
+            if(lead.Email != null){
+                leadEmails.add(lead.Email); //leadEmail: a.com, b.com, c.com
+            }
+        }
+
+        List<Contact> conRecordsWithMatchingEmails = [SELECT Id, Email FROM Contact WHERE Email IN :leadEmails];
+        
+        if(conRecordsWithMatchingEmails.size() > 0){
+            for(Contact conRecord: conRecordsWithMatchingEmails){
+                conMatchingEmailList.add(conRecord.Email);//b.com
+            }
+
+            for(String leadEmail : leadEmails){ //a.com,b.com, c.com
+                if(!conMatchingEmailList.contains(leadEmail)){
+                    leadEmailsToCreate.add(leadEmail); //a.com,c.com
+                }
+            }
+
+            for(Lead lead: leadRecords){//a.com, b.com, c.com
+                if(leadEmailsToCreate.contains(lead.Email)){//a.com, c.com
+                    createLeadToContactList.add(lead);//a.com, c.com
+                }
+            }
+
+            for(Lead leadRec: createLeadToContactList){
+                Contact con = new Contact();
+                con.LastName = leadRec.Name;
+                con.Email = leadRec.Email;
+                conRecordsToCreate.add(con);
+            }
+
+            insert conRecordsToCreate;
+        }
+
+        else{
+            //create all contacts = 1 for every lead
+        }
+        
+    }
+        
+
 }
