@@ -81,5 +81,54 @@ public with sharing class MapsUtil {
             }
         }
         return stageBasedOppMap;
+    
+    }
+
+    public static void understandMapDeclarations(){
+        
+        //Basic declaration with no values
+        Map<String,String> mapWithoutDefaultValues = new Map<String, String>();
+        mapWithoutDefaultValues.put('1', 'Himanshu');
+        mapWithoutDefaultValues.put('2', 'Maheshwari');
+        System.debug(mapWithoutDefaultValues);
+
+        //Basic declaration with default values
+        Map<String,String> mapWithDefaultValues = new Map<String,String>{
+            '1' => 'Srini',
+            '2' => 'Victor',
+            '3' => 'Naitik'
+        };
+
+        System.debug(mapWithDefaultValues);
+
+        //Declaration with SOQL query
+        Map<Id, Opportunity> oppRecordsMap = new Map<Id, Opportunity>([SELECT Id, Name, StageName FROM Opportunity]);
+        System.debug(oppRecordsMap);
+
+        //loop through keys
+        for(Id oppId: oppRecordsMap.keyset()){
+            System.debug(oppId);
+        }
+
+
+        //loop through all the values
+        for(Opportunity opp: oppRecordsMap.values()){
+            System.debug(opp.StageName);
+        }
+
+        //find the record which has Stagename = Prospecting and Name is Finding this out
+        for(Opportunity opp: oppRecordsMap.values()){
+            if(opp.StageName == 'Prospecting' && opp.Name == 'Finding this out'){
+                System.debug(opp.Id);
+            }
+        }
+
+        for(Id oppId: oppRecordsMap.keyset()){
+            Opportunity oppRecordInHand = oppRecordsMap.get(oppId);
+            if(oppRecordInHand.StageName == 'Prospecting' && oppRecordInHand.Name == 'Finding this out'){
+                System.debug(oppId);
+            }
+        }
+
     }
 }
