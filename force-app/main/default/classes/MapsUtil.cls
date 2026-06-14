@@ -131,4 +131,11 @@ public with sharing class MapsUtil {
         }
 
     }
+
+    public static void handleListViaMap(List<Opportunity> oppRecords){
+
+        Map<Id,Opportunity> oppRecordsMap = new Map<Id,Opportunity>(oppRecords);
+        System.debug(oppRecordsMap);
+        //use the map directly in your code further
+    }
 }
