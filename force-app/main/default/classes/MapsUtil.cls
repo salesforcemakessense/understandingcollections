@@ -60,7 +60,26 @@ public with sharing class MapsUtil {
 
         //re enable member to the project by using put
         roleVsNameMapPrivate.put('Salesforce Quality', 'Jayant Rajput');
-        System.debug('Final Team: ' + roleVsNameMapPrivate);
+        System.debug('Final Team: ' + roleVsNameMapPrivate);}
+
+    public static Map<String, List<Opportunity>> populateMapUnderstanding(){
+        Map<String, List<Opportunity>> stageBasedOppMap = new Map<String, List<Opportunity>>();
         
+        List<Opportunity> oppRecords = [SELECT Id, Name, StageName FROM Opportunity LIMIT 10];
+
+        for(Opportunity opp: oppRecords){
+            System.debug('Entered for: ' + opp);
+            if(stageBasedOppMap.containsKey(opp.StageName)){
+                System.debug('Entered for: ' + opp.StageName + ' after the first time');
+                List<Opportunity> currentOppList = stageBasedOppMap.get(opp.StageName);
+                currentOppList.add(opp);
+                stageBasedOppMap.put(opp.StageName, currentOppList);
+            }
+            else{
+                System.debug('Entered for: ' + opp.StageName + ' for the first time');
+                stageBasedOppMap.put(opp.StageName, new List<Opportunity>{opp});
+            }
+        }
+        return stageBasedOppMap;
     }
 }
