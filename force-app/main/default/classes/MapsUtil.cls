@@ -1,4 +1,20 @@
 public with sharing class MapsUtil {
+
+    public static void handleBeforeUpdate(List<Opportunity> newRecords, List<Opportunity> oldRecords, Map<Id,Opportunity> newMap, Map<Id,Opportunity> oldMap){
+       
+        for(Opportunity opp: newRecords){
+            String oldStage = oldMap.get(opp.Id).StageName;
+            String newStage = newMap.get(opp.Id).StageName;
+
+            if(oldStage != newStage){
+                System.debug('Stage was changed');
+                if(newStage == 'Value Proposition' && oldStage == 'Needs Analysis'){
+                    System.debug('I want to create a task');
+                }
+            }
+
+        }
+    }
     
     public static void understandMapMethods(){
         Map<String,String> roleVsNameMap = new Map<String,String>();
@@ -229,4 +245,6 @@ public with sharing class MapsUtil {
             }
         }
     }
+
+    
 }
