@@ -138,4 +138,57 @@ public with sharing class MapsUtil {
         System.debug(oppRecordsMap);
         //use the map directly in your code further
     }
+
+    public static void handleHighValueOpportunities(){
+        List<Account> accountList = [SELECT Id, Name FROM Account LIMIT 200];
+        List<Opportunity> opportunityList = [SELECT Id, AccountId, StageName, Amount FROM Opportunity WHERE isClosed = false AND AccountId IN :accountList];
+        List<Contact> contactList = [SELECT Id, Email, FirstName, LastName, AccountId FROM Contact WHERE AccountId IN :accountList];
+        
+        System.debug(accountList.size());
+        System.debug(opportunityList.size());
+        System.debug(contactList.size());
+
+        //iterate over every account I have
+        //inside I would iterate over every oppportunity I have for each account
+        //for every opp, I would checkif it has amount > 10L and isclosed = false
+        //if yes: I would set up boolean flag - that this account has a high value opp
+        //if I found atleast one high value opp, I would check all contacts in my account - that particualr account for which I found oneopp
+        //for every such contact I found for that account, I would create task record and insert the taskList
+
+        Map<Id,Boolean> accountIdWithHighValueOppFound = new Map<Id,Boolean>();
+        Map<Id,List<Contact>> accountIdToContactsMap = new Map<Id,List<Contact>>();
+        
+        for(Opportunity opp: opportunityList){
+            if(opp.AccountId != null && opp.Amount >= 1000000)
+            //high value opp
+            accountIdWithHighValueOppFound.put(opp.AccountId, true);
+        }
+
+        for(Contact con: contactList){
+            //the below should onlybe done if account qualifies as a high value
+            if(accountIdWithHighValueOppFound.containsKey(con.AccountId)){
+                if(accountIdToContactsMap.containsKey(con.AccountId)){
+                    List<Contact> conListToAppend = accountIdToContactsMap.get(con.AccountId);
+                    conListToAppend.add(con);
+                    accountIdToContactsMap.put(con.AccountId, conListToAppend);
+                }
+                else{
+                    accountIdToContactsMap.put(con.AccountId, new List<Contact>{con});
+                }
+            }
+        }
+        List<Contact> conListToCreateTasksFor =new List<Contact>();
+        for(List<Contact> conList: accountIdToContactsMap.values()){
+            conListToCreateTasksFor.addAll(conList);
+        }
+        List<Task> tList = new List<Task>();
+        for(Contact con: conListToCreateTasksFor){
+            Task t =  new Task();
+            t.WhoId = con.Id;
+            t.WhatId = con.AccountId;
+            tList.add(t);
+        }
+
+        insert tList;
+    }
 }
