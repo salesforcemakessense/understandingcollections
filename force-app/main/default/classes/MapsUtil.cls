@@ -191,4 +191,42 @@ public with sharing class MapsUtil {
 
         insert tList;
     }
+
+    public static void handleSOQLWithinLoop(){
+        //for every account where Indystry is Technology
+        //find all contacts and create Tasks for them
+        List<Contact> conList = [SELECT Id, AccountId, FirstName, LastName, Email FROM Contact WHERE AccountId != null];
+        List<Id> accIds = new List<Id>();
+
+        for(Contact con: conList){
+            accIds.add(con.AccountId);
+        }
+        Map<Id,Account> accountMap = new Map<Id,Account>([SELECT Id, Name, Industry FROM Account WHERE Id IN :accIds]);
+        List<Task> tList = new List<Task>();
+        for(Contact con: conList){
+             Id accId = con.AccountId;
+             if(accId != null){
+                Account acc = accountMap.get(accId);
+                if(acc != null){
+                    Task tRec = new Task();
+                    tRec.WhatId = accId;
+                    tRec.WhoId = con.Id;
+                    tList.add(tRec);
+                }
+            }
+        }
+
+        if(!tList.isEmpty()){
+            insert tList;
+        }
+
+        for(Contact con: conList){
+            //overworks for too many records
+            Id accId = con.AccountId;
+            Account acc = [SELECT Id, Industry FROM Account WHERE Id = :accId LIMIT 1]; //-> number of SOQL queries exception
+            if(acc.Industry == 'Technology'){
+                //create task record here
+            }
+        }
+    }
 }
