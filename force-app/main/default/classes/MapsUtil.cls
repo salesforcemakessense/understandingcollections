@@ -1,5 +1,42 @@
 public with sharing class MapsUtil {
 
+    public static void understandRecordGrouping(){
+        Map<Id, List<Contact>> accIdVsContactMap = new Map<Id, List<Contact>>();
+
+        List<Contact> conList = [SELECT Id, FirstName, Email, LastName, AccountId FROM Contact WHERE AccountId != null];
+        for(Contact con: conList){
+            if(accIdVsContactMap.containsKey(con.AccountId)){
+                List<Contact> conListToAppend = accIdVsContactMap.get(con.AccountId);
+                conListToAppend.add(con);
+                accIdVsContactMap.put(con.AccountId, conListToAppend);
+            }
+            else{
+                accIdVsContactMap.put(con.AccountId, new List<Contact>{con});
+            }
+        }
+        /*
+        for(Id accId : accIdVsContactMap.keySet()){
+            System.debug('Looping for: ' + accId + ' with values of contact: ' + accIdVsContactMap.get(accId));
+        }*/
+
+        Map<Id, Integer> accIdVsContactCountMap = new Map<Id, Integer>();
+        for(Id accId : accIdVsContactMap.keySet()){
+            accIdVsContactCountMap.put(accId, accIdVsContactMap.get(accId).size());
+        }
+
+        for(Id accId : accIdVsContactCountMap.keySet()){
+            System.debug('Looping for: ' + accId + ' with size of contact: ' + accIdVsContactCountMap.get(accId));
+        }
+
+        for(Id accId : accIdVsContactCountMap.keySet()){
+            if(accIdVsContactCountMap.get(accId) >= 2){
+                System.debug('Looping for: ' + accId + ' with size of contact: ' + accIdVsContactCountMap.get(accId));
+            }
+        }
+
+    }
+
+
     public static void handleBeforeUpdate(List<Opportunity> newRecords, List<Opportunity> oldRecords, Map<Id,Opportunity> newMap, Map<Id,Opportunity> oldMap){
        
         for(Opportunity opp: newRecords){
