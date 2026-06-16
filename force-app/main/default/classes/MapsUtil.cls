@@ -1,5 +1,84 @@
 public with sharing class MapsUtil {
 
+    public static void handleAccountsByCountryCode(){
+        Map<String, List<Account>> countryCodeToAccountsMap = new Map<String, List<Account>>();
+        List<Account> accRecords = [SELECT Id, Name, BillingPostalCode, ShippingPostalCode, Phone FROM Account where BillingPostalCode != null];
+
+        for(Account acc: accRecords){
+            if(countryCodeToAccountsMap.containsKey(acc.BillingPostalCode)){
+                List<Account> accListToAppend = countryCodeToAccountsMap.get(acc.BillingPostalCode);
+                accListToAppend.add(acc);
+                countryCodeToAccountsMap.put(acc.BillingPostalCode, accListToAppend);
+            }
+            else{
+                countryCodeToAccountsMap.put(acc.BillingPostalCode, new List<Account>{acc});
+            }
+        }
+
+        for(String postalCode: countryCodeToAccountsMap.keyset()){
+            System.debug(postalCode + ' has ' + countryCodeToAccountsMap.get(postalCode).size() + ' accounts');
+        }
+
+    }
+    public static void handleContactDuplicates(){
+        List<Contact> conList = [SELECT Id, FirstName, LastName, Email FROM Contact WHERE Email != null];
+
+        /*contacts with the same email
+        H@m.com ->  h@m.com
+        sms@gmail.com
+        hmsms@gmail.com
+        h@m.com
+        h@M.COM -> h@m.com 
+        key,value
+        email -> all contacts which have that email 
+        whichever key has the value (List<Contact>) - size > 1 it means it has one or more duplicates*/
+
+        Map<String, List<Contact>> emailToContactMap = new Map<String, List<Contact>>();
+        for(Contact con: conList){
+            String emailFormatted = con.Email.trim().toLowerCase();
+            
+            if(emailToContactMap.containsKey(emailFormatted)){
+                List<Contact> conListToAppend = emailToContactMap.get(emailFormatted);
+                conListToAppend.add(con);
+                emailToContactMap.put(emailFormatted, conListToAppend);    
+            }
+            else{
+                emailToContactMap.put(emailFormatted, new List<Contact>{con});
+            }
+        }
+
+        for(String emailId : emailToContactMap.keyset()){
+            Integer contactSizePerEmailAddress = emailToContactMap.get(emailId).size();
+            if(contactSizePerEmailAddress > 1){
+                System.debug('Duplicate emails found in system for: ' + emailId);
+            }
+        }
+
+    }
+
+    public static void handleOppsByStage(){
+        List<Opportunity> oppList = [SELECT Id, StageName, CloseDate, Amount FROM Opportunity WHERE StageName != null];
+
+        Map<String, List<Opportunity>> stagetoOppMap = new Map<String, List<Opportunity>>();
+        for(Opportunity opp: oppList){
+            
+            if(stagetoOppMap.containsKey(opp.StageName)){
+                List<Opportunity> oppListToAppend = stagetoOppMap.get(opp.StageName);
+                oppListToAppend.add(opp);
+                stagetoOppMap.put(opp.StageName, oppListToAppend);    
+            }
+            else{
+                stagetoOppMap.put(opp.StageName, new List<Opportunity>{opp});
+            }
+        }
+
+        for(String stageName: stagetoOppMap.keyset()){
+            System.debug('Stage:' + stageName + ' has ' + stagetoOppMap.get(stageName).size() + ' opportunities');
+        }
+
+    }
+
+
     public static void understandRecordGrouping(){
         Map<Id, List<Contact>> accIdVsContactMap = new Map<Id, List<Contact>>();
 
