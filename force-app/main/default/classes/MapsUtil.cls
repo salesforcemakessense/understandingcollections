@@ -1,5 +1,54 @@
 public with sharing class MapsUtil {
 
+    public static void handleOppByStageForAccounts(){
+        /* For every account, store the opportunity amount grouped by stage name
+        Prospect -> 50000
+        Negotiate -> 75000
+        Map<Id,Map<String,Decimal>>
+        acc1: {
+            Prospect -> 50000
+            Negotiate -> 75000
+        }
+        acc2: {
+            Prospect -> 30000
+            Negotiate -> 45000
+        }
+
+        acc1: opp1-Prospect: 35000, opp2: prospect: 25000
+        acc1: new Map<String, Decimal>
+        acc2: new Map<String, Decimal>
+        acc3: new Map<String, Decimal>
+        */
+
+        Map<Id,Map<String,Decimal>> accPerOppAmountMap = new Map<Id,Map<String,Decimal>>();
+        List<Opportunity> oppRecords = [SELECT Id, StageName, Amount, AccountId FROM Opportunity WHERE AccountId != null AND StageName != null AND Amount != null];
+        for(Opportunity opp: oppRecords){//opp1,opp2
+            if(!accPerOppAmountMap.containsKey(opp.AccountId)){
+                accPerOppAmountMap.put(opp.AccountId, new Map<String, Decimal>());
+                //{acc1: empty map}
+            }
+
+            Map<String, Decimal> stageByAmountMap = accPerOppAmountMap.get(opp.AccountId); //empty,{Prospect-35000}
+            Decimal existingAmount = stageByAmountMap.containsKey(opp.StageName) ? stageByAmountMap.get(opp.StageName) : 0;
+            //0,35000
+            Decimal oppAmount = opp.Amount != null ? opp.Amount : 0;
+            //35000, 25000
+            stageByAmountMap.put(opp.StageName,(existingAmount+opp.Amount));
+            //{Prospect-60000}
+            accPerOppAmountMap.put(opp.AccountId,stageByAmountMap);
+            //{acc1: {Prospect-60000}}
+        }
+
+        for(Id accId: accPerOppAmountMap.keySet()){
+            System.debug(accId);
+            Map<String,Decimal> innerMap = accPerOppAmountMap.get(accId);
+            for(String stageName: innerMap.keySet()){
+                System.debug('StageName is:' + stageName + ' ' + innerMap.get(stageName));
+            }
+        }
+
+    }
+
     public static void handleAccountsByCountryCode(){
         Map<String, List<Account>> countryCodeToAccountsMap = new Map<String, List<Account>>();
         List<Account> accRecords = [SELECT Id, Name, BillingPostalCode, ShippingPostalCode, Phone FROM Account where BillingPostalCode != null];
